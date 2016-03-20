@@ -17,10 +17,10 @@ vec2 zcoords(float iz) {
   return vec2(column, row) * shape.xy;
 }
 
-vec4 getVoxel(vec3 p) {  
+vec4 getVoxel(vec3 p) {
   //Calculate clamp weight
   vec2 wp = step(0.0, p.xy) * step(-shape.xy, -p.xy);
-  float w = wp.x * wp.y * 
+  float w = wp.x * wp.y *
     step(shape.z*timeShift, p.z) *
     step(-shape.z*(1.0+timeShift), -p.z);
 
@@ -33,7 +33,7 @@ vec4 getVoxel(vec3 p) {
   //Read pixels
   vec4 voxel = texture2D(voxels, (coord + zcoords(iz)) / tshape);
 
-  return vec4(voxel.rgb*w, mix(1.0, voxel.a, w));
+  return vec4(2.0 * voxel.rrr, pow(voxel.r, 5.0));
 }
 
 float rayStep(vec3 coordinate, vec3 direction) {
@@ -46,7 +46,7 @@ float rayStep(vec3 coordinate, vec3 direction) {
 
 vec4 over(vec4 ca, vec4 cb) {
   float ao = 1.0 - (1.0 - ca.a) * (1.0 - cb.a);
-  return vec4(step(0.0, ao) * mix(cb.rgb, ca.rgb, ca.a / ao), ao);
+  return vec4(ao * mix(cb.rgb, ca.rgb, ca.a / ao), ao);
 }
 
 float alphaWeight(float ao, float dt) {
@@ -55,19 +55,18 @@ float alphaWeight(float ao, float dt) {
 
 vec4 castRay(vec3 origin, vec3 direction) {
   vec4 c = vec4(0.0,0.0,0.0,0.0);
-  for(int i=0; i<100; ++i) {
+  for(int i=0; i<300; ++i) {
     //Calculate step
     float dt = rayStep(origin, direction);
-    
+
     //Read voxel
     vec4 ci = getVoxel(origin);
 
     //Update color
-    float alpha = step(0.0, -ci.a);
-    c = over(c, vec4(ci.rgb, alphaWeight(alpha, dt)));
+    c = over(c, vec4(ci.rgb, alphaWeight(ci.a, dt)));
 
     //March ray
-    origin += direction * max(dt, 128.0*ci.a-2.0);
+    origin += direction * dt;
   }
   return c;
 }
@@ -77,7 +76,6 @@ void main() {
 
   vec3 direction = normalize(shape*(rayOrigin - eye));
   vec3 origin    = shape * (0.5 * (rayOrigin + 1.0));
-  origin.z      += timeShift * shape.z;
 
   vec4 hitColor = castRay(origin, direction);
   gl_FragColor = vec4(hitColor.rgb / max(hitColor.a,0.001), hitColor.a);
