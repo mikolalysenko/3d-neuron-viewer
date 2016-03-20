@@ -11,6 +11,7 @@
     "binary-xhr": "0.0.2",
     "bit-twiddle": "^1.0.2",
     "browserify": "^5.11.2",
+    "control-panel": "^1.1.1",
     "convex-boundary-3d": "^1.0.1",
     "cwise": "^1.0.4",
     "distance-transform": "^0.1.0",

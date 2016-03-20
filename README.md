@@ -1,13 +1,8 @@
-gif-3d
-======
+3d-neuron-viewer
+================
 
-This program is a 3D animated gif visualizer.
-
-Drag and drop images onto the web page to view them in 3D.
-
-Beware!  Large gifs may crash your browser.
-
+Renders a scan of some mouse neurons in 3D
 
 Credits
 =======
-(c) 2014 Mikola Lysenko. MIT License
+(c) 2014-2016 Mikola Lysenko. MIT License

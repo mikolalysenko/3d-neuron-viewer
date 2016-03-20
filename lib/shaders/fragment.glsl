@@ -6,8 +6,7 @@ uniform vec3 shape;       //Volume resolution
 uniform vec2 zshape;      //Z factorization
 uniform vec2 tshape;      //Texture resolution
 
-uniform float opacity;
-uniform float timeShift;
+uniform float intensity, transparency, stepSize;
 
 varying vec3 rayOrigin;
 
@@ -21,8 +20,8 @@ vec4 getVoxel(vec3 p) {
   //Calculate clamp weight
   vec2 wp = step(0.0, p.xy) * step(-shape.xy, -p.xy);
   float w = wp.x * wp.y *
-    step(shape.z*timeShift, p.z) *
-    step(-shape.z*(1.0+timeShift), -p.z);
+    step(0.0, p.z) *
+    step(-shape.z, -p.z);
 
   //Get offset in xy slice
   vec2 coord = p.xy;
@@ -33,7 +32,7 @@ vec4 getVoxel(vec3 p) {
   //Read pixels
   vec4 voxel = texture2D(voxels, (coord + zcoords(iz)) / tshape);
 
-  return vec4(2.0 * voxel.rrr, pow(voxel.r, 5.0));
+  return w * vec4(intensity * voxel.rrr, pow(voxel.r, transparency));
 }
 
 float rayStep(vec3 coordinate, vec3 direction) {
@@ -50,12 +49,12 @@ vec4 over(vec4 ca, vec4 cb) {
 }
 
 float alphaWeight(float ao, float dt) {
-  return 1.0 - exp(-4.0 * ao * opacity * dt);
+  return 1.0 - exp(-4.0 * ao * dt);
 }
 
 vec4 castRay(vec3 origin, vec3 direction) {
   vec4 c = vec4(0.0,0.0,0.0,0.0);
-  for(int i=0; i<300; ++i) {
+  for(int i=0; i<500; ++i) {
     //Calculate step
     float dt = rayStep(origin, direction);
 
@@ -66,8 +65,9 @@ vec4 castRay(vec3 origin, vec3 direction) {
     c = over(c, vec4(ci.rgb, alphaWeight(ci.a, dt)));
 
     //March ray
-    origin += direction * dt;
+    origin += direction * dt * stepSize;
   }
+
   return c;
 }
 
