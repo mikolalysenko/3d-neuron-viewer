@@ -1,7 +1,9 @@
 3d-neuron-viewer
 ================
 
-Renders a scan of some mouse neurons in 3D
+Renders a scan of some mouse neurons in 3D.
+
+<img src="snapshot.png" />
 
 Credits
 =======
